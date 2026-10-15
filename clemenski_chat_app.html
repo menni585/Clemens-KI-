@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="de" class="h-full bg-black">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClemensKI</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Minimalist Scrollbar */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #000000;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #222222;
+            border-radius: 2px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #333333;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+    </style>
+</head>
+<body class="h-full bg-black text-neutral-200 font-sans antialiased flex flex-col selection:bg-neutral-800 selection:text-white">
+
+    <!-- HEADER -->
+    <header class="h-16 border-b border-neutral-800 bg-black px-4 sm:px-6 flex items-center justify-between relative z-40 shrink-0 select-none">
+        <!-- Logo & Active Mode Indicator -->
+        <div class="flex items-center gap-3">
+            <h1 class="text-lg sm:text-xl font-black tracking-widest text-white uppercase">ClemensKI</h1>
+            <span class="text-neutral-600 font-mono text-xs">•</span>
+            <span id="activeModeTitle" class="text-xs font-mono font-bold tracking-wider text-neutral-400 uppercase">
+                WEBSITE KI
+            </span>
+        </div>
+
+        <!-- 3-Punkte-Menü Button (48x48px Touch Target) -->
+        <button 
+            id="menuBtn" 
+            type="button"
+            aria-label="Menü öffnen"
+            class="w-12 h-12 flex items-center justify-center text-neutral-400 hover:text-white active:scale-95 transition-all rounded cursor-pointer relative z-50 focus:outline-none"
+        >
+            <i class="fa-solid fa-ellipsis-vertical text-xl pointer-events-none"></i>
+        </button>
+
+        <!-- BACKDROP OVERLAY (Closes dropdown menu when clicking outside) -->
+        <div id="menuBackdrop" class="hidden fixed inset-0 bg-black/50 z-40"></div>
+
+        <!-- DROPDOWN MENU -->
+        <div id="dropdownMenu" class="hidden absolute right-4 top-14 w-64 bg-black border border-neutral-800 rounded shadow-2xl z-50 py-2">
+            
+            <!-- Neuer Chat Button -->
+            <button 
+                type="button"
+                id="btnNewChat"
+                class="w-full text-left px-4 py-3 text-xs text-white hover:bg-neutral-900 flex items-center gap-3 transition-colors cursor-pointer font-mono font-bold"
+            >
+                <i class="fa-solid fa-plus text-white w-4"></i>
+                <span>Neuer Chat</span>
+            </button>
+
+            <div class="border-t border-neutral-900 my-1"></div>
+
+            <div class="px-4 py-1.5 text-[10px] font-mono text-neutral-500 uppercase tracking-widest">
+                MODUS AUSWÄHLEN
+            </div>
+            
+            <button 
+                type="button"
+                id="btnOptWebsite"
+                class="w-full text-left px-4 py-2.5 text-xs text-white hover:bg-neutral-900 flex items-center justify-between transition-colors cursor-pointer"
+            >
+                <span class="flex items-center gap-3 font-mono">
+                    <i class="fa-solid fa-code text-neutral-500 w-4"></i>
+                    <span>Website KI</span>
+                </span>
+                <i id="checkWebsite" class="fa-solid fa-check text-white text-xs"></i>
+            </button>
+
+            <button 
+                type="button"
+                id="btnOptBusiness"
+                class="w-full text-left px-4 py-2.5 text-xs text-white hover:bg-neutral-900 flex items-center justify-between transition-colors cursor-pointer"
+            >
+                <span class="flex items-center gap-3 font-mono">
+                    <i class="fa-solid fa-chart-line text-neutral-500 w-4"></i>
+                    <span>Business KI</span>
+                </span>
+                <i id="checkBusiness" class="fa-solid fa-check text-white text-xs hidden"></i>
+            </button>
+
+            <div class="border-t border-neutral-900 my-1"></div>
+
+            <!-- Verlauf Button -->
+            <button 
+                type="button"
+                id="btnHistory"
+                class="w-full text-left px-4 py-3 text-xs text-white hover:bg-neutral-900 flex items-center gap-3 transition-colors cursor-pointer font-mono"
+            >
+                <i class="fa-solid fa-clock-rotate-left text-neutral-400 w-4"></i>
+                <span>Bisherige Chats</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- CHAT MESSAGES CONTAINER -->
+    <main class="flex-1 overflow-y-auto p-4 sm:p-6 bg-black flex flex-col">
+        <div id="chatHistory" class="max-w-3xl w-full mx-auto space-y-6 my-auto">
+            <!-- Dynamic Messages inserted here -->
+        </div>
+    </main>
+
+    <!-- CHAT INPUT FOOTER -->
+    <footer class="p-4 border-t border-neutral-800 bg-black shrink-0">
+        <form id="chatForm" class="max-w-3xl mx-auto flex gap-2">
+            <textarea 
+                id="chatInput" 
+                rows="1" 
+                placeholder="Schreibe eine Nachricht an ClemensKI..." 
+                class="flex-1 bg-neutral-950 border border-neutral-800 focus:border-neutral-600 text-white px-4 py-3 rounded text-sm focus:outline-none resize-none placeholder-neutral-600 font-sans"
+            ></textarea>
+            <button 
+                type="submit" 
+                id="sendBtn" 
+                aria-label="Nachricht senden"
+                class="px-5 bg-white hover:bg-neutral-200 active:scale-95 text-black font-bold text-xs uppercase tracking-wider rounded transition-all flex items-center justify-center shrink-0 cursor-pointer"
+            >
+                <i class="fa-solid fa-arrow-up text-sm"></i>
+            </button>
+        </form>
+    </footer>
+
+    <!-- HISTORY MODAL OVERLAY -->
+    <div id="historyModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-black border border-neutral-800 w-full max-w-lg rounded shadow-2xl flex flex-col max-h-[80vh]">
+            <div class="p-4 border-b border-neutral-800 flex justify-between items-center">
+                <h2 class="text-xs font-mono font-bold tracking-wider text-white uppercase flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-neutral-400"></i>
+                    Bisherige Chats
+                </h2>
+                <button id="btnCloseHistory" class="text-neutral-500 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            
+            <div id="historyList" class="p-4 overflow-y-auto flex-1 space-y-2">
+                <!-- Dynamic Chat List -->
+            </div>
+
+            <div class="p-4 border-t border-neutral-900 flex justify-end">
+                <button id="btnClearAllChats" class="text-xs font-mono text-red-500 hover:text-red-400 px-3 py-1.5 rounded border border-neutral-900 hover:border-neutral-800">
+                    Alle Chats löschen
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LOGIC -->
+    <script>
+        // System Prompts
+        const systemPrompts = {
+            website: `Du bist ClemensKI im MODUS WEBSITE KI.
+Dein Charakter: Absolut minimalistisch, glasklar, sachlich, kein Schickimiki, keine Begrüßungsfloskeln.
+Deine Hauptaufgabe: Du bist Expert-AI für Webentwicklung, HTML, CSS, JavaScript, Tailwind CSS und UI/UX Design.
+Wenn der Nutzer nach einer Website fragt: Liefere sofort sauberen, einsatzbereiten Code (in Markdown Codeblöcken) und erkläre kurz die Funktionsweise.`,
+            
+            business: `Du bist ClemensKI im MODUS BUSINESS KI.
+Dein Charakter: Direkt, knallhart ehrlich, fokussiert auf Zahlen, Strategie und Resultate. Kein Schickimiki, keine leeren Worthülsen.
+Deine Hauptaufgabe: Du berätst den Nutzer in Business-Aufbau, High-Income Skills, Skalierung, Marketing, Investments und Wegen zum Vermögensaufbau (Reich werden). Gib klare, umsetzbare Schritte.`
+        };
+
+        // --- APP STATE & LOCAL STORAGE ---
+        let chats = JSON.parse(localStorage.getItem('clemenski_chats') || '[]');
+        let currentChatId = localStorage.getItem('clemenski_current_chat_id') || null;
+        let isGenerating = false;
+
+        // Initialize default chat if none exists
+        if (chats.length === 0) {
+            createNewChat('website');
+        } else if (!currentChatId || !chats.find(c => c.id === currentChatId)) {
+            currentChatId = chats[0].id;
+            localStorage.setItem('clemenski_current_chat_id', currentChatId);
+        }
+
+        function getCurrentChat() {
+            return chats.find(c => c.id === currentChatId);
+        }
+
+        function saveState() {
+            localStorage.setItem('clemenski_chats', JSON.stringify(chats));
+            localStorage.setItem('clemenski_current_chat_id', currentChatId);
+        }
+
+        function createNewChat(mode = null) {
+            const activeChat = getCurrentChat();
+            const selectedMode = mode || (activeChat ? activeChat.mode : 'website');
+            
+            const newChat = {
+                id: 'chat_' + Date.now(),
+                title: 'Neuer Chat',
+                mode: selectedMode,
+                createdAt: new Date().toISOString(),
+                messages: []
+            };
+
+            chats.unshift(newChat);
+            currentChatId = newChat.id;
+            saveState();
+            renderApp();
+        }
+
+        // --- RENDER APP ---
+        function renderApp() {
+            const chat = getCurrentChat();
+            if (!chat) return;
+
+            // Update UI Mode Headers
+            const modeTitle = document.getElementById('activeModeTitle');
+            const checkWeb = document.getElementById('checkWebsite');
+            const checkBiz = document.getElementById('checkBusiness');
+
+            if (chat.mode === 'website') {
+                modeTitle.innerText = "WEBSITE KI";
+                checkWeb.classList.remove('hidden');
+                checkBiz.classList.add('hidden');
+            } else {
+                modeTitle.innerText = "BUSINESS KI";
+                checkWeb.classList.add('hidden');
+                checkBiz.classList.remove('hidden');
+            }
+
+            // Render Messages
+            renderMessages();
+        }
+
+        function renderMessages() {
+            const chat = getCurrentChat();
+            const chatHistory = document.getElementById('chatHistory');
+            chatHistory.innerHTML = '';
+
+            if (!chat || chat.messages.length === 0) {
+                // Render Welcome Message for empty chat
+                const welcomeDiv = document.createElement('div');
+                welcomeDiv.className = "space-y-1";
+                welcomeDiv.innerHTML = `
+                    <div class="text-[11px] font-mono text-neutral-500 uppercase tracking-wider">
+                        ClemensKI
+                    </div>
+                    <div class="bg-neutral-950 border border-neutral-800 rounded p-4 text-sm text-neutral-300 leading-relaxed">
+                        Willkommen bei <strong class="text-white font-semibold">ClemensKI</strong>.<br><br>
+                        Aktueller Modus: <span class="text-white font-mono font-bold uppercase">${chat.mode === 'website' ? 'Website KI' : 'Business KI'}</span>.<br>
+                        Nutze das <strong class="text-white">3-Punkte-Menü oben rechts</strong> für einen neuen Chat, den Wechsel des Modus oder zum Ansehen deiner bisherigen Chats.
+                    </div>
+                `;
+                chatHistory.appendChild(welcomeDiv);
+            } else {
+                chat.messages.forEach(msg => {
+                    if (msg.role === 'user') {
+                        appendUserMessageUI(msg.text);
+                    } else {
+                        appendKiMessageUI(msg.text);
+                    }
+                });
+            }
+
+            scrollToBottom();
+        }
+
+        // --- MENU LOGIC ---
+        const menuBtn = document.getElementById('menuBtn');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+        const menuBackdrop = document.getElementById('menuBackdrop');
+        const btnNewChat = document.getElementById('btnNewChat');
+        const btnOptWebsite = document.getElementById('btnOptWebsite');
+        const btnOptBusiness = document.getElementById('btnOptBusiness');
+        const btnHistory = document.getElementById('btnHistory');
+        const historyModal = document.getElementById('historyModal');
+        const btnCloseHistory = document.getElementById('btnCloseHistory');
+        const historyList = document.getElementById('historyList');
+        const btnClearAllChats = document.getElementById('btnClearAllChats');
+
+        function openMenu() {
+            dropdownMenu.classList.remove('hidden');
+            menuBackdrop.classList.remove('hidden');
+        }
+
+        function closeMenu() {
+            dropdownMenu.classList.add('hidden');
+            menuBackdrop.classList.add('hidden');
+        }
+
+        function toggleMenu(e) {
+            if (e) e.stopPropagation();
+            if (dropdownMenu.classList.contains('hidden')) {
+                openMenu();
+            } else {
+                closeMenu();
+            }
+        }
+
+        menuBtn.addEventListener('click', toggleMenu);
+        menuBackdrop.addEventListener('click', closeMenu);
+
+        btnNewChat.addEventListener('click', () => {
+            createNewChat();
+            closeMenu();
+        });
+
+        btnOptWebsite.addEventListener('click', () => {
+            switchMode('website');
+            closeMenu();
+        });
+
+        btnOptBusiness.addEventListener('click', () => {
+            switchMode('business');
+            closeMenu();
+        });
+
+        btnHistory.addEventListener('click', () => {
+            closeMenu();
+            openHistoryModal();
+        });
+
+        btnCloseHistory.addEventListener('click', () => {
+            historyModal.classList.add('hidden');
+        });
+
+        function switchMode(newMode) {
+            const chat = getCurrentChat();
+            if (chat.mode === newMode) return;
+
+            if (chat.messages.length === 0) {
+                chat.mode = newMode;
+                saveState();
+                renderApp();
+            } else {
+                createNewChat(newMode);
+            }
+        }
+
+        // --- HISTORY MODAL LOGIC ---
+        function openHistoryModal() {
+            historyList.innerHTML = '';
+
+            if (chats.length === 0) {
+                historyList.innerHTML = '<div class="text-xs font-mono text-neutral-600 text-center py-4">Keine gespeicherten Chats vorhanden.</div>';
+            } else {
+                chats.forEach(chat => {
+                    const isSelected = chat.id === currentChatId;
+                    const item = document.createElement('div');
+                    item.className = `p-3 rounded border flex justify-between items-center cursor-pointer transition-colors ${isSelected ? 'bg-neutral-900 border-neutral-700' : 'bg-black border-neutral-900 hover:border-neutral-800'}`;
+                    
+                    const dateStr = new Date(chat.createdAt).toLocaleDateString('de-DE', { hour: '2-digit', minute: '2-digit' });
+
+                    item.innerHTML = `
+                        <div class="flex-1 pr-3 overflow-hidden" onclick="loadChatFromHistory('${chat.id}')">
+                            <div class="text-xs font-bold text-white truncate font-mono">${escapeHtml(chat.title || 'Chat')}</div>
+                            <div class="text-[10px] text-neutral-500 font-mono mt-1 flex items-center gap-2">
+                                <span class="uppercase font-bold ${chat.mode === 'website' ? 'text-blue-400' : 'text-emerald-400'}">${chat.mode}</span>
+                                <span>•</span>
+                                <span>${dateStr}</span>
+                            </div>
+                        </div>
+                        <button onclick="deleteChatFromHistory(event, '${chat.id}')" class="text-neutral-600 hover:text-red-400 p-1.5 transition-colors">
+                            <i class="fa-solid fa-trash-can text-xs"></i>
+                        </button>
+                    `;
+                    historyList.appendChild(item);
+                });
+            }
+
+            historyModal.classList.remove('hidden');
+        }
+
+        window.loadChatFromHistory = function(id) {
+            currentChatId = id;
+            saveState();
+            renderApp();
+            historyModal.classList.add('hidden');
+        };
+
+        window.deleteChatFromHistory = function(e, id) {
+            e.stopPropagation();
+            chats = chats.filter(c => c.id !== id);
+            
+            if (chats.length === 0) {
+                createNewChat('website');
+            } else if (currentChatId === id) {
+                currentChatId = chats[0].id;
+            }
+            
+            saveState();
+            openHistoryModal();
+            renderApp();
+        };
+
+        btnClearAllChats.addEventListener('click', () => {
+            chats = [];
+            createNewChat('website');
+            historyModal.classList.add('hidden');
+        });
+
+        // --- CHAT FORM & API LOGIC ---
+        const chatForm = document.getElementById('chatForm');
+        const chatInput = document.getElementById('chatInput');
+
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                submitChat();
+            }
+        });
+
+        chatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            submitChat();
+        });
+
+        async function submitChat() {
+            if (isGenerating) return;
+
+            const text = chatInput.value.trim();
+            if (!text) return;
+
+            const chat = getCurrentChat();
+            if (!chat) return;
+
+            // Set title if it's first message
+            if (chat.messages.length === 0) {
+                chat.title = text.length > 30 ? text.substring(0, 30) + '...' : text;
+            }
+
+            chatInput.value = '';
+
+            // Add & Save User Message
+            chat.messages.push({ role: 'user', text: text });
+            saveState();
+
+            // Render User Message
+            appendUserMessageUI(text);
+
+            // Set Loading
+            isGenerating = true;
+            document.getElementById('sendBtn').disabled = true;
+
+            // Show "ClemensKI SCHREIBT..."
+            const placeholderId = 'writing-' + Date.now();
+            appendKiWritingPlaceholder(placeholderId);
+
+            // Prepare Payload for Gemini API
+            const conversationPayload = chat.messages.map(m => ({
+                role: m.role === 'user' ? 'user' : 'model',
+                parts: [{ text: m.text }]
+            }));
+
+            const apiKey = ""; // Canvas runtime injection
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+
+            const payload = {
+                contents: conversationPayload,
+                systemInstruction: {
+                    parts: [{ text: systemPrompts[chat.mode] }]
+                }
+            };
+
+            try {
+                const response = await fetchWithRetry(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Fehler: Keine Antwort erhalten.";
+
+                // Save KI Message
+                chat.messages.push({ role: 'model', text: aiText });
+                saveState();
+
+                // Update Placeholder to Content
+                replaceWritingPlaceholderWithContent(placeholderId, aiText);
+
+            } catch (err) {
+                console.error(err);
+                replaceWritingPlaceholderWithContent(placeholderId, "Fehler bei der Verbindung mit ClemensKI. Bitte erneut versuchen.");
+            } finally {
+                isGenerating = false;
+                document.getElementById('sendBtn').disabled = false;
+            }
+        }
+
+        async function fetchWithRetry(url, options, retries = 3, delay = 1000) {
+            try {
+                const res = await fetch(url, options);
+                if (!res.ok && res.status === 429 && retries > 0) {
+                    await new Promise(r => setTimeout(r, delay));
+                    return fetchWithRetry(url, options, retries - 1, delay * 2);
+                }
+                return res;
+            } catch (e) {
+                if (retries > 0) {
+                    await new Promise(r => setTimeout(r, delay));
+                    return fetchWithRetry(url, options, retries - 1, delay * 2);
+                }
+                throw e;
+            }
+        }
+
+        // --- DOM RENDER HELPERS ---
+        function appendUserMessageUI(text) {
+            const chatHistory = document.getElementById('chatHistory');
+            const div = document.createElement('div');
+            div.className = "space-y-1 animate-fade-in";
+
+            div.innerHTML = `
+                <div class="text-[11px] font-mono text-neutral-500 uppercase tracking-wider">
+                    DU
+                </div>
+                <div class="bg-neutral-900 border border-neutral-800 rounded p-4 text-sm text-white leading-relaxed whitespace-pre-wrap">
+                    ${escapeHtml(text)}
+                </div>
+            `;
+
+            chatHistory.appendChild(div);
+            scrollToBottom();
+        }
+
+        function appendKiWritingPlaceholder(id) {
+            const chatHistory = document.getElementById('chatHistory');
+            const div = document.createElement('div');
+            div.className = "space-y-1";
+            div.id = id;
+
+            div.innerHTML = `
+                <div class="text-[11px] font-mono text-white font-bold tracking-wider flex items-center gap-2 uppercase">
+                    <span>ClemensKI SCHREIBT...</span>
+                    <span class="inline-block w-2 h-2 bg-white rounded-full animate-ping"></span>
+                </div>
+                <div class="bg-neutral-950 border border-neutral-800 rounded p-4 text-sm text-neutral-500 font-mono italic">
+                    Generiere Antwort...
+                </div>
+            `;
+
+            chatHistory.appendChild(div);
+            scrollToBottom();
+        }
+
+        function replaceWritingPlaceholderWithContent(id, text) {
+            const placeholder = document.getElementById(id);
+            if (!placeholder) return;
+
+            placeholder.innerHTML = `
+                <div class="text-[11px] font-mono text-neutral-400 uppercase tracking-wider">
+                    ClemensKI
+                </div>
+                <div class="bg-neutral-950 border border-neutral-800 rounded p-4 text-sm text-neutral-200 leading-relaxed font-sans">
+                    ${formatMarkdown(text)}
+                </div>
+            `;
+
+            scrollToBottom();
+        }
+
+        function appendKiMessageUI(text) {
+            const chatHistory = document.getElementById('chatHistory');
+            const div = document.createElement('div');
+            div.className = "space-y-1";
+
+            div.innerHTML = `
+                <div class="text-[11px] font-mono text-neutral-400 uppercase tracking-wider">
+                    ClemensKI
+                </div>
+                <div class="bg-neutral-950 border border-neutral-800 rounded p-4 text-sm text-neutral-200 leading-relaxed font-sans">
+                    ${formatMarkdown(text)}
+                </div>
+            `;
+
+            chatHistory.appendChild(div);
+        }
+
+        function formatMarkdown(text) {
+            let escaped = escapeHtml(text);
+            
+            // Code blocks
+            escaped = escaped.replace(/```(html|css|js|javascript|python)?\n([\s\S]*?)```/g, function(match, lang, code) {
+                return `<div class="my-3 bg-black border border-neutral-800 rounded p-3 font-mono text-xs text-neutral-300 overflow-x-auto">
+                    <div class="text-[10px] text-neutral-500 mb-2 border-b border-neutral-900 pb-1 flex justify-between uppercase">
+                        <span>${lang || 'CODE'}</span>
+                        <button onclick="copyToClipboard(this)" class="hover:text-white transition-colors cursor-pointer">Kopieren</button>
+                    </div>
+                    <pre><code>${code}</code></pre>
+                </div>`;
+            });
+
+            // Inline code
+            escaped = escaped.replace(/`([^`]+)`/g, '<code class="bg-neutral-900 text-neutral-300 px-1 py-0.5 rounded font-mono text-xs border border-neutral-800">$1</code>');
+
+            // Bold
+            escaped = escaped.replace(/\*\*([^*]+)\*\*/g, '<strong class="text-white font-semibold">$1</strong>');
+            
+            // Line breaks
+            escaped = escaped.replace(/\n/g, '<br>');
+
+            return escaped;
+        }
+
+        window.copyToClipboard = function(btn) {
+            const code = btn.parentElement.nextElementSibling.innerText;
+            const textArea = document.createElement("textarea");
+            textArea.value = code;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+
+            const origText = btn.innerText;
+            btn.innerText = "KOPIERT!";
+            setTimeout(() => { btn.innerText = origText; }, 1500);
+        };
+
+        function escapeHtml(str) {
+            return str
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function scrollToBottom() {
+            const main = document.querySelector('main');
+            main.scrollTop = main.scrollHeight;
+        }
+
+        // Initial App Render
+        renderApp();
+    </script>
+</body>
+</html>
